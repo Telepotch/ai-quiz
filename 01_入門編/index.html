@@ -405,75 +405,58 @@
     margin-bottom: 28px;
   }
 
+  .cert-recipient-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
   .cert-recipient {
     font-size: 42px;
     font-weight: 700;
     color: var(--text);
     letter-spacing: 8px;
-    margin-bottom: 8px;
   }
   .cert-dono {
-    font-size: 20px;
+    font-size: 22px;
     color: var(--text);
-    margin-bottom: 48px;
   }
 
   .cert-body-text {
-    font-size: 18px;
-    line-height: 2.4;
+    font-size: 20px;
+    line-height: 2.2;
     color: var(--text);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
   }
 
   .cert-bottom {
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     text-align: center;
   }
   .cert-date {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--text);
-    letter-spacing: 4px;
-    margin-bottom: 24px;
+    letter-spacing: 6px;
+    margin-bottom: 28px;
   }
   .cert-org {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--text);
-    letter-spacing: 3px;
-    margin-bottom: 8px;
+    letter-spacing: 4px;
+    margin-bottom: 10px;
   }
   .cert-signer {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text);
-    letter-spacing: 2px;
-    margin-bottom: 4px;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
   }
   .cert-signer-name {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: var(--text);
-    letter-spacing: 8px;
-  }
-
-  /* Stamp / Seal */
-  .cert-seal {
-    display: inline-block;
-    width: 64px;
-    height: 64px;
-    border: 3px solid #C0392B;
-    border-radius: 4px;
-    color: #C0392B;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 16px;
-    text-align: center;
-    transform: rotate(-3deg);
-    position: absolute;
-    right: 80px;
-    bottom: 80px;
+    letter-spacing: 16px;
   }
 
   /* Responsive */
@@ -562,11 +545,13 @@
 
       <div class="cert-middle">
         <div class="cert-course-name" id="cert-course-name"></div>
-        <div class="cert-recipient" id="cert-recipient-name"></div>
-        <div class="cert-dono">殿</div>
+        <div class="cert-recipient-line">
+          <div class="cert-recipient" id="cert-recipient-name"></div>
+          <div class="cert-dono">殿</div>
+        </div>
         <div class="cert-body-text">
-          あなたは上記の講座を<br>
-          履修し修了したことを証します
+          あなたは上記の講座を履修し<br>
+          修了したことを証します
         </div>
       </div>
 
@@ -576,10 +561,6 @@
         <div class="cert-signer">代表取締役CEO</div>
         <div class="cert-signer-name">平 野 友 康</div>
       </div>
-    </div>
-
-    <div class="cert-seal">
-      テレ<br>ポート
     </div>
   </div>
 </div>
