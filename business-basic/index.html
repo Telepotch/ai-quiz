@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ビジネスAIコース基本編 修了テスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #2B5DAE;
+    --primary-light: #E8EFF9;
+    --primary-dark: #1A3D7C;
+    --success: #2E7D32;
+    --success-light: #E8F5E9;
+    --error: #C62828;
+    --error-light: #FFEBEE;
+    --text: #1A1A2E;
+    --text-secondary: #555;
+    --bg: #F5F7FA;
+    --white: #FFFFFF;
+    --border: #D0D7E2;
+    --cert-gold: #8B7335;
+    --cert-gold-light: #C4A74E;
+    --cert-border: #A08940;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+  .header-org {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .header-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-dark);
+  }
+  .header-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    margin: 16px 0 24px;
+  }
+  .progress-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-align: right;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  /* Question Card */
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+  }
+  .question-theme {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .question-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  /* Choices */
+  .choices { list-style: none; }
+  .choice-item {
+    margin-bottom: 10px;
+  }
+  .choice-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .choice-label:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .choice-label input { display: none; }
+  .choice-radio {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .choice-radio::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    transform: scale(0);
+    transition: transform 0.15s;
+  }
+  .choice-label.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .choice-label.selected .choice-radio {
+    border-color: var(--primary);
+  }
+  .choice-label.selected .choice-radio::after {
+    transform: scale(1);
+  }
+
+  /* Result: correct / incorrect */
+  .choice-label.correct {
+    border-color: var(--success);
+    background: var(--success-light);
+  }
+  .choice-label.incorrect {
+    border-color: var(--error);
+    background: var(--error-light);
+  }
+
+  /* Navigation */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--white);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+  }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--text);
+    border: 2px solid var(--border);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    background: var(--primary);
+    color: var(--white);
+    margin-top: 16px;
+  }
+  .btn-submit:hover:not(:disabled) {
+    background: var(--primary-dark);
+  }
+  .btn-success {
+    background: var(--success);
+    color: var(--white);
+  }
+  .btn-success:hover { background: #1B5E20; }
+  .btn-retry {
+    width: 100%;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    background: var(--primary);
+    color: var(--white);
+    margin-top: 12px;
+  }
+
+  /* Result Screen */
+  .result-banner {
+    text-align: center;
+    padding: 32px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .result-banner.pass {
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  }
+  .result-banner.fail {
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+  }
+  .result-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+  }
+  .result-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .result-score {
+    font-size: 16px;
+    color: var(--text-secondary);
+  }
+  .result-score strong {
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  /* Explanation */
+  .explanation-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid var(--border);
+  }
+  .explanation-card.is-correct {
+    border-left-color: var(--success);
+  }
+  .explanation-card.is-incorrect {
+    border-left-color: var(--error);
+  }
+  .explanation-card .q-number {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .explanation-card .q-text {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .explanation-card .q-result {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .explanation-card .q-explanation {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    background: var(--bg);
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  /* Certificate Form */
+  .cert-form {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-top: 24px;
+    text-align: center;
+  }
+  .cert-form h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  .cert-form input[type="text"] {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .cert-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  /* Hidden cert template */
+  .cert-hidden {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+  }
+
+  /* Certificate Template - A4 Portrait */
+  .cert-template {
+    width: 794px; /* A4 at 96dpi */
+    height: 1123px;
+    background: #FFFFF8;
+    position: relative;
+    font-family: 'Noto Serif JP', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Decorative border - extracted from reference certificate */
+  .cert-border-image {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('cert_border_final.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+
+  .cert-content {
+    position: relative;
+    z-index: 1;
+    padding: 80px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: space-between;
+  }
+
+  .cert-main-title {
+    font-size: 64px;
+    font-weight: 900;
+    letter-spacing: 24px;
+    color: var(--text);
+    margin-top: 80px;
+  }
+
+  .cert-middle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cert-course-name {
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: 4px;
+    margin-bottom: 32px;
+  }
+
+  .cert-recipient-line {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+  .cert-recipient {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 8px;
+    line-height: 1;
+  }
+  .cert-dono {
+    font-size: 22px;
+    color: var(--text);
+    line-height: 1;
+    padding-bottom: 4px;
+  }
+
+  .cert-body-text {
+    font-size: 20px;
+    line-height: 2.2;
+    color: var(--text);
+    letter-spacing: 3px;
+  }
+
+  .cert-bottom {
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .cert-date {
+    font-size: 17px;
+    color: var(--text);
+    letter-spacing: 6px;
+    margin-bottom: 28px;
+  }
+  .cert-org {
+    font-size: 17px;
+    color: var(--text);
+    letter-spacing: 4px;
+    margin-bottom: 10px;
+  }
+  .cert-signer {
+    font-size: 15px;
+    color: var(--text);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+  .cert-signer-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 16px;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container { padding: 12px; }
+    .card { padding: 20px; }
+    .header-title { font-size: 18px; }
+    .question-text { font-size: 15px; }
+    .choice-label { padding: 12px 14px; font-size: 14px; }
+    .btn { padding: 10px 20px; font-size: 14px; }
+  }
+
+  /* Screen visibility */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Loading spinner */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Quiz Screen -->
+  <div id="screen-quiz" class="screen active">
+    <div class="header">
+      <div class="header-org">ソースネクスト × テレポート</div>
+      <div class="header-title">ビジネスAIコース基本編 修了テスト</div>
+      <div class="header-sub">全8問 ／ 6問以上正解で合格</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-text" id="progress-text">1 / 8</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 12.5%"></div>
+      </div>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="question-theme" id="question-theme"></div>
+      <div class="question-text" id="question-text"></div>
+      <ul class="choices" id="choices-list"></ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" id="btn-prev" disabled>戻る</button>
+      <button class="btn btn-primary" id="btn-next" disabled>次へ</button>
+    </div>
+    <button class="btn btn-submit" id="btn-submit" style="display:none;">解答する</button>
+  </div>
+
+  <!-- Result Screen -->
+  <div id="screen-result" class="screen">
+    <div class="header">
+      <div class="header-org">ソースネクスト × テレポート</div>
+      <div class="header-title">ビジネスAIコース基本編 修了テスト</div>
+    </div>
+
+    <div id="result-banner" class="result-banner"></div>
+    <div id="result-explanations"></div>
+
+    <button class="btn btn-retry" id="btn-retry">最初から解き直す</button>
+
+    <div id="cert-form-area" class="cert-form" style="display:none;">
+      <h3>修了証を発行する</h3>
+      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:16px;">氏名を入力して「修了証を発行」ボタンを押してください。</p>
+      <input type="text" id="cert-name" placeholder="氏名を入力">
+      <br>
+      <button class="btn btn-success" id="btn-cert" disabled>修了証を発行</button>
+      <p id="cert-generating" style="display:none; margin-top:12px; font-size:14px; color:var(--text-secondary);">修了証を生成中...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Certificate Template -->
+<div class="cert-hidden">
+  <div class="cert-template" id="cert-template">
+    <div class="cert-border-image"></div>
+
+    <div class="cert-content">
+      <div class="cert-main-title">修 了 証</div>
+
+      <div class="cert-middle">
+        <div class="cert-course-name" id="cert-course-name"></div>
+        <div class="cert-recipient-line">
+          <div class="cert-recipient" id="cert-recipient-name"></div>
+          <div class="cert-dono">殿</div>
+        </div>
+        <div class="cert-body-text">
+          あなたは上記の講座を履修し<br>
+          修了したことを証します
+        </div>
+      </div>
+
+      <div class="cert-bottom">
+        <div class="cert-date" id="cert-date"></div>
+        <div class="cert-org">テレポート株式会社</div>
+        <div class="cert-signer">代表取締役CEO</div>
+        <div class="cert-signer-name">平 野 友 康</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let quizData = null;
+  let questions = [];
+  let currentIndex = 0;
+  let answers = {};
+
+  // Shuffle array (Fisher-Yates)
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Convert year to Reiwa
+  function toReiwa(dateStr) {
+    const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+    if (!match) return dateStr;
+    const year = parseInt(match[1]);
+    const reiwa = year - 2018;
+    return `令和${reiwa}年${match[2]}月${match[3]}日`;
+  }
+
+  // Load questions
+  async function init() {
+    try {
+      const res = await fetch('questions.json');
+      quizData = await res.json();
+      questions = shuffle(quizData.questions);
+      answers = {};
+      currentIndex = 0;
+      renderQuestion();
+    } catch (e) {
+      document.getElementById('question-card').innerHTML = '<p style="color:var(--error)">問題データの読み込みに失敗しました。</p>';
+    }
+  }
+
+  function renderQuestion() {
+    const q = questions[currentIndex];
+    const total = questions.length;
+
+    document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${total}`;
+    document.getElementById('progress-fill').style.width = `${((currentIndex + 1) / total) * 100}%`;
+    document.getElementById('question-theme').textContent = q.theme;
+    document.getElementById('question-text').textContent = `Q${currentIndex + 1}. ${q.question}`;
+
+    const list = document.getElementById('choices-list');
+    list.innerHTML = '';
+    q.choices.forEach((choice, i) => {
+      const li = document.createElement('li');
+      li.className = 'choice-item';
+      const label = document.createElement('label');
+      label.className = 'choice-label' + (answers[q.id] === i ? ' selected' : '');
+      label.innerHTML = `
+        <input type="radio" name="q${q.id}" value="${i}">
+        <span class="choice-radio"></span>
+        <span>${choice}</span>
+      `;
+      label.addEventListener('click', () => selectChoice(q.id, i));
+      li.appendChild(label);
+      list.appendChild(li);
+    });
+
+    // Nav buttons
+    document.getElementById('btn-prev').disabled = currentIndex === 0;
+
+    const isLast = currentIndex === total - 1;
+    document.getElementById('btn-next').style.display = isLast ? 'none' : '';
+    document.getElementById('btn-submit').style.display = isLast ? '' : 'none';
+
+    updateNavState();
+  }
+
+  function selectChoice(qId, choiceIndex) {
+    answers[qId] = choiceIndex;
+    // Update UI
+    const labels = document.querySelectorAll('#choices-list .choice-label');
+    labels.forEach((l, i) => {
+      l.classList.toggle('selected', i === choiceIndex);
+    });
+    updateNavState();
+  }
+
+  function updateNavState() {
+    const q = questions[currentIndex];
+    const hasAnswer = answers[q.id] !== undefined;
+    document.getElementById('btn-next').disabled = !hasAnswer;
+    document.getElementById('btn-submit').disabled = !allAnswered();
+  }
+
+  function allAnswered() {
+    return questions.every(q => answers[q.id] !== undefined);
+  }
+
+  // Navigation
+  document.getElementById('btn-next').addEventListener('click', () => {
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    }
+  });
+
+  document.getElementById('btn-prev').addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderQuestion();
+    }
+  });
+
+  // Submit
+  document.getElementById('btn-submit').addEventListener('click', () => {
+    showResults();
+  });
+
+  function showResults() {
+    document.getElementById('screen-quiz').classList.remove('active');
+    document.getElementById('screen-result').classList.add('active');
+    window.scrollTo(0, 0);
+
+    let correctCount = 0;
+    const explanationsHtml = [];
+
+    questions.forEach((q, i) => {
+      const userAnswer = answers[q.id];
+      const isCorrect = userAnswer === q.answer;
+      if (isCorrect) correctCount++;
+
+      const correctText = q.choices[q.answer];
+      const userText = q.choices[userAnswer];
+
+      explanationsHtml.push(`
+        <div class="explanation-card ${isCorrect ? 'is-correct' : 'is-incorrect'}">
+          <div class="q-number">${q.theme} — Q${i + 1}</div>
+          <div class="q-text">${q.question}</div>
+          <div class="q-result">
+            ${isCorrect
+              ? `<span style="color:var(--success)">&#10003; 正解</span>　あなたの回答：${userText}`
+              : `<span style="color:var(--error)">&#10007; 不正解</span>　あなたの回答：${userText}<br><span style="color:var(--success)">正解：${correctText}</span>`
+            }
+          </div>
+          <div class="q-explanation">${q.explanation}</div>
+        </div>
+      `);
+    });
+
+    const total = questions.length;
+    const passed = correctCount >= quizData.passingScore;
+
+    document.getElementById('result-banner').className = `result-banner ${passed ? 'pass' : 'fail'}`;
+    document.getElementById('result-banner').innerHTML = `
+      <div class="result-icon">${passed ? '&#127881;' : '&#128172;'}</div>
+      <div class="result-title">${passed ? '合格' : 'もう少し！'}</div>
+      <div class="result-score"><strong>${correctCount}</strong> / ${total} 問正解</div>
+      <div style="font-size:14px; color:var(--text-secondary); margin-top:8px;">
+        ${passed ? '修了おめでとうございます！下のフォームから修了証を発行できます。' : `合格には${quizData.passingScore}問以上の正解が必要です。もう一度チャレンジしましょう！`}
+      </div>
+    `;
+
+    document.getElementById('result-explanations').innerHTML = explanationsHtml.join('');
+
+    // Show/hide cert form
+    document.getElementById('cert-form-area').style.display = passed ? '' : 'none';
+    document.getElementById('btn-retry').style.display = '';
+  }
+
+  // Retry
+  document.getElementById('btn-retry').addEventListener('click', () => {
+    document.getElementById('screen-result').classList.remove('active');
+    document.getElementById('screen-quiz').classList.add('active');
+    document.getElementById('cert-name').value = '';
+    document.getElementById('btn-cert').disabled = true;
+    init();
+  });
+
+  // Certificate name input
+  document.getElementById('cert-name').addEventListener('input', (e) => {
+    document.getElementById('btn-cert').disabled = e.target.value.trim() === '';
+  });
+
+  // Generate certificate PDF
+  document.getElementById('btn-cert').addEventListener('click', async () => {
+    const name = document.getElementById('cert-name').value.trim();
+    if (!name) return;
+
+    const genMsg = document.getElementById('cert-generating');
+    const btn = document.getElementById('btn-cert');
+    btn.disabled = true;
+    genMsg.style.display = '';
+
+    // Fill template
+    document.getElementById('cert-course-name').textContent = quizData.courseTitle;
+    document.getElementById('cert-recipient-name').textContent = name;
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+    document.getElementById('cert-date').textContent = toReiwa(todayStr);
+
+    // Wait for fonts to render
+    await document.fonts.ready;
+    await new Promise(r => setTimeout(r, 300));
+
+    try {
+      const template = document.getElementById('cert-template');
+      const canvas = await html2canvas(template, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#FFFFF8'
+      });
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`修了証_${name}.pdf`);
+    } catch (e) {
+      alert('修了証の生成に失敗しました。もう一度お試しください。');
+      console.error(e);
+    }
+
+    btn.disabled = false;
+    genMsg.style.display = 'none';
+  });
+
+  // Start
+  init();
+})();
+</script>
+</body>
+</html>
